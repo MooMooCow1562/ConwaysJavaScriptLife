@@ -5,6 +5,12 @@ const alive = 2;
 const ghost = 1;
 const dead = 0;
 
+//hardcoding rules, I just need this to be conway's game of life, I can implement customizable rules another time.
+const live = [2, 3];
+const birth = [3];
+//conway's kernel, might allow people to implement custom kernels after this honors project is finished.
+const kernel = [[1, 1, 1], [1, 0, 1], [1, 1, 1]];
+
 //hardcoding the color values for now.
 var livingColor = "#ffffff"; // Color of living cells
 var ghostColor = "#aaaaaa"; // Color of ghost cells
@@ -70,7 +76,7 @@ function randomizeBoard() {
 }
 
 //draws board separately from the computations for the board.
-function drawBoard(){
+function drawBoard() {
     for (let i = 0; i < (canvas.height / cellSize); i++) {
         for (let j = 0; j < (canvas.width / cellSize); j++) {
             drawCell(i * 10, j * 10);
@@ -79,7 +85,100 @@ function drawBoard(){
 }
 
 //simply resets the board, for the user.
-function clearBoard(){
+function clearBoard() {
     currentGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
     drawBoard();
+}
+
+//clone returns shallow copies of arrays in javascript, I will work around this with the following function:
+function cloneInto(into, cloneMe) {
+    //for every entry in into, clone the value in the corresponding array in cloneMe.
+    for (let i = 0; i < (canvas.height / cellSize); i++) {
+        for (let j = 0; j < (canvas.width / cellSize); j++) {
+            into[i][j] = cloneMe[i][j] + "";
+        }
+    }
+}
+
+function step() {
+    for (let i = 0; i < (canvas.height / cellSize); i++) {
+        for (let j = 0; j < (canvas.width / cellSize); j++) {
+            var shouldLive = false;
+            var shouldBirth = false;
+            //if the current cell is alive
+            if (currentGrid[i][j] == alive) {
+                //check to see if it should live into the next generation by cross referencing each of the rules for live.
+                var check = checkNeighbors(i, j);
+                live.forEach(element => {
+                    if (check == element) {
+                        shouldLive = true;
+                    }
+                });
+                //if current cell is dead or a ghost
+            } else if (currentGrid[i][j] != alive) {
+                //check to see if it should be born into the next generation by cross referencing each of the rules for birth.
+                var check = checkNeighbors(i, j);
+                birth.forEach(element => {
+                    if (check == element) {
+                        shouldBirth = true;
+                    }
+                });
+            }
+            //if neither of the if conditions are met, then don't process the rules for them.
+
+            //if either should live or should birth are existent and true
+            if (shouldLive || shouldBirth) {
+                //next generation's grid cell comes to life.
+                nextGrid[i][j] = alive;
+            } else if (currentGrid[i][j] > dead) {
+                //otherwise if I'm alive or a ghost, become a ghost, or dead repsectively.
+                nextGrid[i][j] = currentGrid[i][j] - 1;
+            } else {
+                //otherwise, the dead stay dead.
+                nextGrid[i][j] = dead;
+            }
+        }
+    }
+    //set the current board as a copy of the next
+    cloneInto(currentGrid, nextGrid);
+    //draw the board
+    drawBoard();
+}
+
+//this function checks nearby cells for living cells.
+function checkNeighbors(x, y) {
+    var livingNeighbors = 0;
+    var start;
+    var end;
+    //for odd kernels, do not weight the kernel direction.
+    if (kernel.length % 2 == 1) {
+        start = Math.floor(kernel.length / 2);
+    } else {//for even kernels, weight the kernel towards the bottom right.
+        //yes this is my answer for odd kernels and because I'm hardcoding this for the honors project, it will never be used. It's future proofing.
+        start = Math.floor(kernel.length / 2) - 1;
+    }
+    end = Math.floor(kernel.length / 2);
+
+    for (let i = -start; i <= end; i++) {
+        for (let j = -start; j <= end; j++) {
+            //if the kernel has a value other then 0 and the current cell being looked at is alive
+            if ((kernel[i + start][j + start] != 0) && (currentGrid[wrap(x + j, canvas.height / cellSize)][wrap(y + i, canvas.width / cellSize)] == alive)) {
+                livingNeighbors++;//increment living neighbors.
+            }
+        }
+    }
+    return livingNeighbors;
+}
+
+function wrap(value, dimension) {
+    //if the value is too small,
+    if (value < 0) {//wrap to the right.
+        return value + dimension;
+    }
+    //if value is too big
+    if (value >= dimension) {//wrap to the left.
+        return value - dimension;
+    }
+    //otherwise, return the value.
+    return value;
 }
