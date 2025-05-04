@@ -77,3 +77,9 @@ function drawBoard(){
         }
     }
 }
+
+//simply resets the board, for the user.
+function clearBoard(){
+    currentGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
+    drawBoard();
+}
