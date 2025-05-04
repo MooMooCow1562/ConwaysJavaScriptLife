@@ -35,6 +35,9 @@ context.fillRect(0, 0, canvas.width, canvas.height); // Fill the canvas with the
 var currentGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
 var nextGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
 
+//hardcoding speed for the moment.
+var speed = 10;
+
 //Need a 2D array, Javascript unfortunately does not have an easy way to make these so I'll just make a function to do it :D
 function create2dArray(length, height) {
     let arr = new Array(height);
@@ -181,4 +184,24 @@ function wrap(value, dimension) {
     }
     //otherwise, return the value.
     return value;
+}
+
+//the interval.
+var interval;
+//starts the game
+function start() {
+    console.log("Game Started");
+    interval = setInterval(step, 1000 / speed);
+    document.getElementById("startButton").disabled = true;
+    document.getElementById("stopButton").disabled = false;
+}
+//ends it
+function stop() {
+    console.log("Game Stopped");
+    clearInterval(interval);
+    document.getElementById("startButton").disabled = false;
+    document.getElementById("stopButton").disabled = true;
+}
+function changeSpeed(value) {
+    speed = value;
 }
