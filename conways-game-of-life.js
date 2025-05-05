@@ -227,16 +227,25 @@ function cellToggle(e) {
 
 //allows you to actually highlight cells.
 function cellHighlight(e) {
+    //clears prior movments instead of letting them sit in place.
     drawBoard();
     var bound = canvas.getBoundingClientRect();
     if ((e.clientY - bound.top < canvas.height && e.clientX - bound.left < canvas.width) && (e.clientY - bound.top > 0 && e.clientX - bound.left > 0)) {
         var c1 = flattenCoordinate(e.clientX - bound.left);
         var c2 = flattenCoordinate(e.clientY - bound.top);
-        //clears prior movments instead of letting them sit in place.
+        //also gonna make an overlay to show what column and row you're on.
+        context.strokeStyle = "#ff0000";
+        context.strokeRect(0, c2, canvas.width, cellSize);
+        context.strokeRect(c1, 0, cellSize, canvas.height);
+
+        //draws the initial highlight, twice, because once isn't enough.
         context.strokeStyle = "#0000ff";
-        //three, because one wasn't good enough for me.
         context.strokeRect(c1, c2, cellSize, cellSize);
         context.strokeRect(c1, c2, cellSize, cellSize);
-        context.strokeRect(c1, c2, cellSize, cellSize);
+
+        //create an overlay on the board to indicate "I'm being edited!"
+        context.strokeStyle = "#00ff00";
+        context.strokeRect(0,0, canvas.width-1, canvas.height-1);
+        context.strokeRect(1,1, canvas.width-2, canvas.height-2);
     }
 }
