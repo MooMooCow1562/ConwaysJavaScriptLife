@@ -90,6 +90,7 @@ function drawBoard() {
 //simply resets the board, for the user.
 function clearBoard() {
     currentGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
+    nextGrid = create2dArray(canvas.width / cellSize, canvas.height / cellSize);
     drawBoard();
 }
 
@@ -204,4 +205,38 @@ function stop() {
 }
 function changeSpeed(value) {
     speed = value;
+}
+
+canvas.addEventListener("click", cellToggle);
+canvas.addEventListener("mousemove", cellHighlight);
+canvas.addEventListener("mouseleave", cellHighlight);
+
+//allows you to actually toggle cells.
+function cellToggle(e) {
+    var bound = canvas.getBoundingClientRect();
+    var c1 = flattenCoordinate(e.clientY - bound.top) / 10;
+    var c2 = flattenCoordinate(e.clientX - bound.left) / 10;
+    //console.log(c1+" "+c2);
+    currentGrid[c1][c2]--;
+    if (currentGrid[c1][c2] < 0) {
+        currentGrid[c1][c2] = 2;
+    }
+    drawBoard();
+    cellHighlight(e);
+}
+
+//allows you to actually highlight cells.
+function cellHighlight(e) {
+    drawBoard();
+    var bound = canvas.getBoundingClientRect();
+    if ((e.clientY - bound.top < canvas.height && e.clientX - bound.left < canvas.width) && (e.clientY - bound.top > 0 && e.clientX - bound.left > 0)) {
+        var c1 = flattenCoordinate(e.clientX - bound.left);
+        var c2 = flattenCoordinate(e.clientY - bound.top);
+        //clears prior movments instead of letting them sit in place.
+        context.strokeStyle = "#0000ff";
+        //three, because one wasn't good enough for me.
+        context.strokeRect(c1, c2, cellSize, cellSize);
+        context.strokeRect(c1, c2, cellSize, cellSize);
+        context.strokeRect(c1, c2, cellSize, cellSize);
+    }
 }
